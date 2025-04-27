@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM jupyter/datascience-notebook:latest
 
 WORKDIR /app
 
@@ -7,8 +7,15 @@ RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted
 
 RUN python -m ipykernel install --user
 
+# Jupyter Notebook 설정
+RUN jupyter notebook --generate-config \
+    && echo "c.NotebookApp.ip = '0.0.0.0'" >> /etc/jupyter/jupyter_notebook_config.py \
+    && echo "c.NotebookApp.port = 8888" >> /etc/jupyter/jupyter_notebook_config.py \
+    && echo "c.NotebookApp.notebook_dir = '/home/jovyan/work'" >> /etc/jupyter/jupyter_notebook_config.py
+
 COPY . .
 
-EXPOSE 8866
+EXPOSE 8888
 
-CMD ["voila", "app.ipynb", "--port=8866", "--no-browser"]
+# 컨테이너 시작 시 Jupyter Notebook 실행
+CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--allow-root", "--no-browser"]
